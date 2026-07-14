@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════
+   PREMIUM MONOCHROME + EMERALD GREEN THEME
+   ═══════════════════════════════════════════════════ */
+
+/* ── BASE ─────────────────────────────────────────── */
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-dark-900 text-dark-100 font-sans overflow-x-hidden;
+    /* Ultra-subtle emerald gradient reflection at top-left/bottom-right */
+    background-image:
+      radial-gradient(at 0% 0%,    rgba(0,168,107,0.025) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(0,168,107,0.015) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* Input elements — pure white bg, rich black text, emerald focus ring */
+  input, select, textarea {
+    color: #111111 !important;
+    background-color: #ffffff !important;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #111111 !important;
+    opacity: 0.4;
+  }
+}
+
+/* ── COMPONENTS ───────────────────────────────────── */
+@layer components {
+
+  /* Premium Card Panel — white surface, thin light gray border + shadow */
+  .glass-panel {
+    @apply bg-white border border-dark-700;
+    box-shadow: 0 1px 4px 0 rgba(17,17,17,0.03), 0 1px 2px -1px rgba(17,17,17,0.01);
+  }
+
+  .glass-panel-hover {
+    @apply transition-all duration-300 hover:bg-white;
+  }
+  .glass-panel-hover:hover {
+    border-color: rgba(0, 168, 107, 0.35) !important;
+    box-shadow: 0 8px 30px 0 rgba(17,17,17,0.05);
+  }
+
+  /* Decorative borders */
+  .neon-border-violet {
+    @apply border border-dark-700;
+  }
+  .neon-border-cyan {
+    border: 1px solid rgba(0, 168, 107, 0.35) !important;
+  }
+
+  /* Hero gradient text: rich black → emerald green */
+  .text-gradient-purple-cyan {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, #111111 0%, #008F5A 100%);
+  }
+}
+
+/* ── SCROLLBAR ────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: #f8f9fa; }
+::-webkit-scrollbar-thumb  { background: #D1D5DB; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* ── ANIMATIONS ───────────────────────────────────── */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.12; transform: scale(1);    }
+  50%       { opacity: 0.22; transform: scale(1.03); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(17,17,17,0.05);
+  border-top-color: #00A86B;
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════════
+   LIGHT-MODE UTILITY OVERRIDES
+   "white/opacity" → "dark-on-white" equivalents
+   ══════════════════════════════════════════════════ */
+
+/* Borders */
+.border-white\/5  { border-color: rgba(17,17,17,0.12)  !important; }
+.border-white\/10 { border-color: rgba(17,17,17,0.16)  !important; }
+.border-white\/20 { border-color: rgba(17,17,17,0.22)  !important; }
+
+/* Backgrounds */
+.bg-white\/5  { background-color: rgba(17,17,17,0.03) !important; }
+.bg-white\/10 { background-color: rgba(17,17,17,0.06) !important; }
+.bg-white\/15 { background-color: rgba(17,17,17,0.08) !important; }
+
+/* ══════════════════════════════════════════════════
+   TEXT-WHITE INVERSION (for light-theme preservation)
+   ══════════════════════════════════════════════════ */
+
+/* 1. Global override — dark text on light bg */
+.text-white {
+  color: #111111 !important;
+}
+
+/* 2. Restore white text when element itself has a dark bg class */
+.bg-brand-600.text-white,
+.bg-brand-700.text-white,
+.bg-brand-500.text-white,
+.bg-accent-600.text-white,
+.bg-accent-500.text-white,
+.bg-accent-400.text-white {
+  color: #ffffff !important;
+}
+
+/* 3. Restore white text when INSIDE a dark parent */
+[class*="from-brand-6"] .text-white,
+[class*="from-brand-5"] .text-white,
+[class*="bg-brand-6"]   .text-white,
+[class*="bg-brand-5"]   .text-white,
+[class*="from-accent-6"] .text-white,
+[class*="from-accent-5"] .text-white,
+[class*="bg-gradient-to"] .text-white,
+.bg-black\/60 .text-white,
+.bg-black\/60 span,
+.bg-black\/60 p,
+.bg-black\/60 h3,
+.bg-black\/60 h4 {
+  color: #ffffff !important;
+}
+
+/* 4. Always-white helper class (destination photo overlays etc.) */
+.text-white-force {
+  color: #ffffff !important;
+}
+
+/* ── NavBar dark input bg used for status badge area ── */
+.bg-dark-900\/60 span,
+.bg-dark-900\/60 strong {
+  color: #111111 !important;
+}
+
+/* ══════════════════════════════════════════════════
+   RECHARTS — readable labels on white bg
+   ══════════════════════════════════════════════════ */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(17,17,17,0.08) !important;
+}
+.recharts-xAxis .recharts-cartesian-axis-tick-value,
+.recharts-yAxis .recharts-cartesian-axis-tick-value {
+  fill: #374151 !important;
+  font-weight: 600 !important;
+  font-size: 10px !important;
+}
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #ffffff !important;
+  border: 1px solid #D1D5DB !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(17,17,17,0.05) !important;
+}
+
+/* ══════════════════════════════════════════════════
+   FORCE ALL TEXT BLACK ON WHITE BACKGROUNDS
+   Any Tailwind gray/neutral/slate utilities override
+   ══════════════════════════════════════════════════ */
+
+/* Tailwind gray scale overrides */
+.text-gray-400, .text-gray-500, .text-gray-600,
+.text-neutral-400, .text-neutral-500, .text-neutral-600,
+.text-slate-400, .text-slate-500, .text-slate-600,
+.text-zinc-400, .text-zinc-500, .text-zinc-600 {
+  color: #111111 !important;
+}
+
+/* Recharts axis labels — pure black */
+
+/* ══════════════════════════════════════════════════
+   FUNCTIONAL BADGE COLORS
+   ══════════════════════════════════════════════════ */
+
+/* ── Score: Good (emerald success text) */
+.text-emerald-400 { color: #00663F !important; }
+.bg-emerald-500\/10 { background-color: #E8FFF6 !important; }
+.border-emerald-500\/20 { border-color: rgba(0, 102, 63, 0.20) !important; }
+.border-emerald-500\/30 { border-color: rgba(0, 102, 63, 0.35) !important; }
+
+/* ── Score: Medium (warning text) / Stars */
+.text-amber-400  { color: #D97706 !important; }
+.text-amber-500  { color: #D97706 !important; }
+.bg-amber-500\/5  { background-color: rgba(217,119,6,0.05) !important; }
+.bg-amber-500\/10 { background-color: rgba(217,119,6,0.08) !important; }
+.border-amber-500\/10 { border-color: rgba(217,119,6,0.12) !important; }
+.border-amber-500\/20 { border-color: rgba(217,119,6,0.22) !important; }
+.border-amber-500\/30 { border-color: rgba(217,119,6,0.32) !important; }
+
+/* ── Score: Low (error text) */
+.text-rose-400   { color: #DC2626 !important; }
+.text-rose-300   { color: #EF4444 !important; }
+.bg-rose-500\/10 { background-color: rgba(220,38,38,0.06) !important; }
+.border-rose-500\/20 { border-color: rgba(220,38,38,0.15) !important; }
+.border-rose-500\/30 { border-color: rgba(220,38,38,0.25) !important; }
+
+/* ── Fast flight badge (sky → now emerald/monochrome) */
+.text-sky-400   { color: #00663F !important; }
+.bg-sky-500\/10 { background-color: #E8FFF6 !important; }
+.border-sky-500\/20 { border-color: rgba(0, 102, 63, 0.20) !important; }
+
+/* ── DB status indicator dots */
+.bg-emerald-500 { background-color: #00A86B !important; }
+.bg-amber-500   { background-color: #D97706 !important; }
+
+/* ── Accent-400 text (prices, highlights) maps to emerald green */
+.text-accent-400 { color: #00663F !important; }
