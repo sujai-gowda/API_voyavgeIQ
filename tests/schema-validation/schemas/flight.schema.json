@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "voyageiq/flight",
+  "title": "Flight Search Result Item",
+  "description": "Schema for a single flight object returned by GET /api/search/flights",
+  "type": "object",
+  "required": ["id", "type", "carrier", "price", "departureTime", "arrivalTime", "stops", "duration"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique flight identifier",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "const": "flight",
+      "description": "Must always be 'flight'"
+    },
+    "provider": {
+      "type": "string",
+      "description": "Data source provider name"
+    },
+    "carrier": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Airline name"
+    },
+    "flightNumber": {
+      "type": "string",
+      "description": "Airline flight number"
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total price in INR"
+    },
+    "departureTime": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ISO 8601 departure datetime"
+    },
+    "arrivalTime": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ISO 8601 arrival datetime"
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Flight duration in minutes"
+    },
+    "stops": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Number of stops (0 = non-stop)"
+    },
+    "terminal": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "seatClass": {
+      "type": "string"
+    },
+    "score": {
+      "type": ["number", "null"],
+      "description": "AI ranking score (0-100), null before ranking"
+    }
+  }
+}

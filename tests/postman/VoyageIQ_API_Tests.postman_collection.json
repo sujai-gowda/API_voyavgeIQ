@@ -1,0 +1,677 @@
+{
+  "info": {
+    "_postman_id": "voyageiq-test-collection-v1",
+    "name": "VoyageIQ API Test Suite",
+    "description": "Comprehensive automated API tests for the VoyageIQ travel application. Covers all endpoints: health check, search (flights/hotels/trains/destination/all), AI services (rank/price-trend/budget-plan/chat), and cache management. Validates status codes, response schemas, field presence, error handling, and performance thresholds.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL",       "value": "http://localhost:5000" },
+    { "key": "FROM",           "value": "DEL" },
+    { "key": "TO",             "value": "BOM" },
+    { "key": "DATE",           "value": "2026-08-15" },
+    { "key": "RETURN_DATE",    "value": "2026-08-20" },
+    { "key": "TRAVELERS",      "value": "2" },
+    { "key": "BUDGET",         "value": "50000" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GET / — Server Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// TC-HC-01: Status code must be 200",
+                  "pm.test('TC-HC-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// TC-HC-02: Response must be JSON",
+                  "pm.test('TC-HC-02: Response is valid JSON', function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "",
+                  "// TC-HC-03: Message field must exist",
+                  "pm.test('TC-HC-03: message field exists', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('message');",
+                  "});",
+                  "",
+                  "// TC-HC-04: Status field must be healthy",
+                  "pm.test('TC-HC-04: status field is healthy', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('healthy');",
+                  "});",
+                  "",
+                  "// TC-HC-05: Response time under 500ms",
+                  "pm.test('TC-HC-05: Response time < 500ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/",
+            "description": "Verifies the Express backend is alive and returning healthy status."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flight Search",
+      "item": [
+        {
+          "name": "GET /api/search/flights — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// TC-FL-01: Status code 200",
+                  "pm.test('TC-FL-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// TC-FL-02: Response is JSON array",
+                  "pm.test('TC-FL-02: Response is a JSON array', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "});",
+                  "",
+                  "// TC-FL-03: Array has at least one result",
+                  "pm.test('TC-FL-03: At least one flight returned', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "// TC-FL-04: First item has required fields",
+                  "pm.test('TC-FL-04: Flight object has required fields', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        var flight = json[0];",
+                  "        pm.expect(flight).to.have.property('id');",
+                  "        pm.expect(flight).to.have.property('type');",
+                  "        pm.expect(flight).to.have.property('carrier');",
+                  "        pm.expect(flight).to.have.property('price');",
+                  "        pm.expect(flight).to.have.property('departureTime');",
+                  "        pm.expect(flight).to.have.property('arrivalTime');",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-FL-05: type field equals 'flight'",
+                  "pm.test('TC-FL-05: type field is flight', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0].type).to.eql('flight');",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-FL-06: price is a positive number",
+                  "pm.test('TC-FL-06: price is a positive number', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0].price).to.be.a('number').and.to.be.above(0);",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-FL-07: Response time under 5000ms",
+                  "pm.test('TC-FL-07: Response time < 5000ms (API aggregation)', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/search/flights?from={{FROM}}&to={{TO}}&date={{DATE}}&returnDate={{RETURN_DATE}}&travelers={{TRAVELERS}}&budget={{BUDGET}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "search", "flights"],
+              "query": [
+                { "key": "from",        "value": "{{FROM}}" },
+                { "key": "to",          "value": "{{TO}}" },
+                { "key": "date",        "value": "{{DATE}}" },
+                { "key": "returnDate",  "value": "{{RETURN_DATE}}" },
+                { "key": "travelers",   "value": "{{TRAVELERS}}" },
+                { "key": "budget",      "value": "{{BUDGET}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/search/flights — Missing Required Params (Error Handling)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// TC-FL-08: Missing params must return 400",
+                  "pm.test('TC-FL-08: Missing params returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "// TC-FL-09: Error response has error field",
+                  "pm.test('TC-FL-09: Error response has error field', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('error');",
+                  "});",
+                  "",
+                  "// TC-FL-10: error message mentions missing parameters",
+                  "pm.test('TC-FL-10: Error message is descriptive', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error).to.be.a('string').and.have.length.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/search/flights",
+            "description": "Intentionally missing from/to/date — should return 400 error."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hotel Search",
+      "item": [
+        {
+          "name": "GET /api/search/hotels — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// TC-HT-01: Status 200",
+                  "pm.test('TC-HT-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// TC-HT-02: Response is array",
+                  "pm.test('TC-HT-02: Response is a JSON array', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "// TC-HT-03: At least one hotel",
+                  "pm.test('TC-HT-03: At least one hotel returned', function () {",
+                  "    pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});",
+                  "",
+                  "// TC-HT-04: Hotel has required fields",
+                  "pm.test('TC-HT-04: Hotel object has required fields', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        var hotel = json[0];",
+                  "        pm.expect(hotel).to.have.property('id');",
+                  "        pm.expect(hotel).to.have.property('type');",
+                  "        pm.expect(hotel).to.have.property('name');",
+                  "        pm.expect(hotel).to.have.property('price');",
+                  "        pm.expect(hotel).to.have.property('rating');",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-HT-05: type is hotel",
+                  "pm.test('TC-HT-05: type field is hotel', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0].type).to.eql('hotel');",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-HT-06: price is positive number",
+                  "pm.test('TC-HT-06: price is a positive number', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0].price).to.be.a('number').and.above(0);",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-HT-07: rating is between 0 and 5",
+                  "pm.test('TC-HT-07: rating is between 0 and 5', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0].rating).to.be.within(0, 5);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/search/hotels?from={{FROM}}&to={{TO}}&date={{DATE}}&returnDate={{RETURN_DATE}}&travelers={{TRAVELERS}}&budget={{BUDGET}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "search", "hotels"],
+              "query": [
+                { "key": "from",       "value": "{{FROM}}" },
+                { "key": "to",         "value": "{{TO}}" },
+                { "key": "date",       "value": "{{DATE}}" },
+                { "key": "returnDate", "value": "{{RETURN_DATE}}" },
+                { "key": "travelers",  "value": "{{TRAVELERS}}" },
+                { "key": "budget",     "value": "{{BUDGET}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/search/hotels — Missing Params (Error Handling)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-HT-08: Missing params returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('TC-HT-09: Error response has error field', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('error');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/search/hotels"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Train Search",
+      "item": [
+        {
+          "name": "GET /api/search/trains — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// TC-TR-01: Status 200",
+                  "pm.test('TC-TR-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// TC-TR-02: Response is array",
+                  "pm.test('TC-TR-02: Response is a JSON array', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "// TC-TR-03: Train fields",
+                  "pm.test('TC-TR-03: Train object has required fields', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0]).to.have.property('id');",
+                  "        pm.expect(json[0]).to.have.property('type');",
+                  "        pm.expect(json[0]).to.have.property('name');",
+                  "        pm.expect(json[0]).to.have.property('price');",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-TR-04: type is train",
+                  "pm.test('TC-TR-04: type field is train', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0].type).to.eql('train');",
+                  "    }",
+                  "});",
+                  "",
+                  "// TC-TR-05: price is positive",
+                  "pm.test('TC-TR-05: price is a positive number', function () {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0].price).to.be.a('number').and.above(0);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/search/trains?from={{FROM}}&to={{TO}}&date={{DATE}}&travelers={{TRAVELERS}}&budget={{BUDGET}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "search", "trains"],
+              "query": [
+                { "key": "from",      "value": "{{FROM}}" },
+                { "key": "to",        "value": "{{TO}}" },
+                { "key": "date",      "value": "{{DATE}}" },
+                { "key": "travelers", "value": "{{TRAVELERS}}" },
+                { "key": "budget",    "value": "{{BUDGET}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/search/trains — Missing Params (Error Handling)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-TR-06: Missing params returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('TC-TR-07: Error response has error field', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('error');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/search/trains"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Destination Search",
+      "item": [
+        {
+          "name": "GET /api/search/destination — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-DS-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-DS-02: Response is JSON object', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('object');",
+                  "});",
+                  "pm.test('TC-DS-03: city field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('city');",
+                  "});",
+                  "pm.test('TC-DS-04: weather field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('weather');",
+                  "});",
+                  "pm.test('TC-DS-05: safetyScore field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('safetyScore');",
+                  "});",
+                  "pm.test('TC-DS-06: averageCost field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('averageCost');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/search/destination?from={{FROM}}&to={{TO}}&date={{DATE}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "search", "destination"],
+              "query": [
+                { "key": "from", "value": "{{FROM}}" },
+                { "key": "to",   "value": "{{TO}}" },
+                { "key": "date", "value": "{{DATE}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Aggregated Search",
+      "item": [
+        {
+          "name": "GET /api/search/all — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-SA-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-SA-02: Response is JSON object', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('object');",
+                  "});",
+                  "pm.test('TC-SA-03: flights array exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('flights');",
+                  "    pm.expect(pm.response.json().flights).to.be.an('array');",
+                  "});",
+                  "pm.test('TC-SA-04: hotels array exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('hotels');",
+                  "    pm.expect(pm.response.json().hotels).to.be.an('array');",
+                  "});",
+                  "pm.test('TC-SA-05: trains array exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('trains');",
+                  "    pm.expect(pm.response.json().trains).to.be.an('array');",
+                  "});",
+                  "pm.test('TC-SA-06: destination object exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('destination');",
+                  "});",
+                  "pm.test('TC-SA-07: Response time < 8000ms (parallel fetch)', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(8000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/search/all?from={{FROM}}&to={{TO}}&date={{DATE}}&returnDate={{RETURN_DATE}}&travelers={{TRAVELERS}}&budget={{BUDGET}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "search", "all"],
+              "query": [
+                { "key": "from",       "value": "{{FROM}}" },
+                { "key": "to",         "value": "{{TO}}" },
+                { "key": "date",       "value": "{{DATE}}" },
+                { "key": "returnDate", "value": "{{RETURN_DATE}}" },
+                { "key": "travelers",  "value": "{{TRAVELERS}}" },
+                { "key": "budget",     "value": "{{BUDGET}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Services",
+      "item": [
+        {
+          "name": "POST /api/ai/rank — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-AI-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-AI-02: Response is JSON object', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('object');",
+                  "});",
+                  "pm.test('TC-AI-03: flights array in response', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('flights');",
+                  "});",
+                  "pm.test('TC-AI-04: hotels array in response', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('hotels');",
+                  "});",
+                  "pm.test('TC-AI-05: trains array in response', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('trains');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flights\": [\n    { \"id\": \"FL-01\", \"type\": \"flight\", \"carrier\": \"IndiGo\", \"price\": 4500, \"stops\": 0, \"duration\": 120 }\n  ],\n  \"hotels\": [\n    { \"id\": \"HT-01\", \"type\": \"hotel\", \"name\": \"Test Hotel\", \"price\": 3000, \"rating\": 4.2, \"distance\": 2.5 }\n  ],\n  \"trains\": [\n    { \"id\": \"TR-01\", \"type\": \"train\", \"name\": \"Rajdhani Express\", \"price\": 1200, \"duration\": 480 }\n  ]\n}"
+            },
+            "url": "{{BASE_URL}}/api/ai/rank"
+          }
+        },
+        {
+          "name": "POST /api/ai/predict-price-trend — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-PT-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-PT-02: recommendation field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('recommendation');",
+                  "});",
+                  "pm.test('TC-PT-03: confidence field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('confidence');",
+                  "});",
+                  "pm.test('TC-PT-04: trend field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('trend');",
+                  "});",
+                  "pm.test('TC-PT-05: trend has labels and prices', function () {",
+                  "    var trend = pm.response.json().trend;",
+                  "    pm.expect(trend).to.have.property('labels');",
+                  "    pm.expect(trend).to.have.property('prices');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"DEL\",\n  \"to\": \"BOM\",\n  \"date\": \"2026-08-15\",\n  \"price\": 5500\n}"
+            },
+            "url": "{{BASE_URL}}/api/ai/predict-price-trend"
+          }
+        },
+        {
+          "name": "POST /api/ai/budget-plan — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-BP-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-BP-02: budget field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('budget');",
+                  "});",
+                  "pm.test('TC-BP-03: packages array exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('packages');",
+                  "    pm.expect(pm.response.json().packages).to.be.an('array');",
+                  "});",
+                  "pm.test('TC-BP-04: At least one package returned', function () {",
+                  "    pm.expect(pm.response.json().packages.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"DEL\",\n  \"to\": \"BOM\",\n  \"date\": \"2026-08-15\",\n  \"budget\": 50000,\n  \"travelers\": 2\n}"
+            },
+            "url": "{{BASE_URL}}/api/ai/budget-plan"
+          }
+        },
+        {
+          "name": "POST /api/ai/chat — Valid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-CH-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-CH-02: reply field exists', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('reply');",
+                  "});",
+                  "pm.test('TC-CH-03: reply is non-empty string', function () {",
+                  "    pm.expect(pm.response.json().reply).to.be.a('string').and.have.length.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hello, I want to travel to Goa\",\n  \"history\": []\n}"
+            },
+            "url": "{{BASE_URL}}/api/ai/chat"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cache Management",
+      "item": [
+        {
+          "name": "GET /api/cache/stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-CA-01: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-CA-02: Response is JSON object', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/cache/stats"
+          }
+        },
+        {
+          "name": "POST /api/cache/clear",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('TC-CA-03: Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('TC-CA-04: message field in response', function () {",
+                  "    pm.expect(pm.response.json()).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/cache/clear"
+          }
+        }
+      ]
+    }
+  ]
+}

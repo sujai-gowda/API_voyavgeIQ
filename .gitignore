@@ -120,3 +120,7 @@ coverage.xml
 *.log
 .hypothesis/
 .pytest_cache/
+
+# VoyageIQ Test Pipeline Outputs
+tests/reports/
+

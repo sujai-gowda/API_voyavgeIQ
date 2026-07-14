@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "voyageiq/ai-rank",
+  "title": "AI Rank Response",
+  "description": "Schema for POST /api/ai/rank response — scored flights, hotels, trains",
+  "type": "object",
+  "required": ["flights", "hotels", "trains"],
+  "additionalProperties": true,
+  "properties": {
+    "flights": {
+      "type": "array",
+      "description": "Scored flight results"
+    },
+    "hotels": {
+      "type": "array",
+      "description": "Scored hotel results"
+    },
+    "trains": {
+      "type": "array",
+      "description": "Scored train results"
+    }
+  }
+}

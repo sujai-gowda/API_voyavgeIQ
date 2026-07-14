@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoyageIQ — Testing Dashboard</title>
+  <meta name="description" content="Real-time CI/CD testing dashboard for VoyageIQ API monitoring">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header" id="dashboard-header">
+      <div class="header-content">
+        <div class="logo-group">
+          <div class="logo-icon">🧭</div>
+          <div>
+            <h1 class="logo-text">VoyageIQ <span class="accent">Testing Dashboard</span></h1>
+            <p class="subtitle" id="last-updated">CI/CD Pipeline Monitor • Loading...</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" id="btn-refresh" onclick="loadAllData()">
+            <span class="btn-icon">↻</span> Refresh
+          </button>
+          <a class="btn btn-primary" id="btn-report" href="../reports/latest-report.html" target="_blank">
+            <span class="btn-icon">📄</span> Full Report
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Overall Status Banner -->
+    <section class="status-banner" id="status-banner">
+      <div class="status-indicator" id="status-indicator">
+        <div class="status-dot" id="status-dot"></div>
+        <span class="status-text" id="status-text">Loading...</span>
+      </div>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="stats-grid" id="stats-grid">
+      <div class="stat-card" id="stat-total">
+        <div class="stat-icon">🧪</div>
+        <div class="stat-value" id="val-total">—</div>
+        <div class="stat-label">Total Tests</div>
+      </div>
+      <div class="stat-card card-pass" id="stat-passed">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="val-passed">—</div>
+        <div class="stat-label">Passed</div>
+      </div>
+      <div class="stat-card card-fail" id="stat-failed">
+        <div class="stat-icon">❌</div>
+        <div class="stat-value" id="val-failed">—</div>
+        <div class="stat-label">Failed</div>
+      </div>
+      <div class="stat-card" id="stat-avg-time">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-value" id="val-avg-time">—</div>
+        <div class="stat-label">Avg Response</div>
+      </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- API Health Table -->
+      <section class="panel panel-wide" id="panel-health">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span class="panel-icon">🏥</span> API Health Status
+          </h2>
+        </div>
+        <div class="panel-body">
+          <table class="data-table" id="health-table">
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th>Method</th>
+                <th>Avg Time</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>Errors</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="health-tbody">
+              <tr><td colspan="7" class="empty-state">Loading performance data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Performance Chart -->
+      <section class="panel" id="panel-chart">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span class="panel-icon">📈</span> Response Time Overview
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="chart-container" id="chart-container">
+            <svg id="perf-chart" viewBox="0 0 500 280" class="chart-svg"></svg>
+          </div>
+          <div class="chart-legend" id="chart-legend"></div>
+        </div>
+      </section>
+
+      <!-- Schema Validation -->
+      <section class="panel" id="panel-schema">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span class="panel-icon">📋</span> Schema Validation
+          </h2>
+        </div>
+        <div class="panel-body">
+          <table class="data-table" id="schema-table">
+            <thead>
+              <tr>
+                <th>API</th>
+                <th>Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="schema-tbody">
+              <tr><td colspan="3" class="empty-state">Loading schema data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Pipeline History -->
+      <section class="panel panel-wide" id="panel-pipeline">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span class="panel-icon">🔧</span> Pipeline Stage Results
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="pipeline-stages" id="pipeline-stages">
+            <div class="empty-state">Loading pipeline data...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Failed APIs -->
+      <section class="panel panel-wide" id="panel-failures" style="display:none;">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span class="panel-icon">🔴</span> Failed Tests
+          </h2>
+        </div>
+        <div class="panel-body">
+          <table class="data-table" id="failure-table">
+            <thead>
+              <tr>
+                <th>Test</th>
+                <th>Request</th>
+                <th>Code</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody id="failure-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="dashboard-footer">
+      <p>VoyageIQ Continuous Testing Pipeline • Dashboard v1.0</p>
+    </footer>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

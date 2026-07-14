@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "voyageiq/price-trend",
+  "title": "Price Trend Prediction Response",
+  "description": "Schema for POST /api/ai/predict-price-trend response",
+  "type": "object",
+  "required": ["recommendation", "confidence", "explanation", "trend"],
+  "additionalProperties": true,
+  "properties": {
+    "recommendation": {
+      "type": "string",
+      "enum": ["Buy Now", "Wait", "Monitor"],
+      "description": "Recommended action"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Prediction confidence percentage"
+    },
+    "explanation": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable explanation"
+    },
+    "trend": {
+      "type": "object",
+      "required": ["labels", "prices"],
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Date labels for chart"
+        },
+        "prices": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 1,
+          "description": "Historical price data points"
+        }
+      }
+    }
+  }
+}

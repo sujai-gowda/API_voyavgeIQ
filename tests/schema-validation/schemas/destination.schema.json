@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "voyageiq/destination",
+  "title": "Destination Info",
+  "description": "Schema for destination object returned by GET /api/search/destination",
+  "type": "object",
+  "required": ["city", "weather", "safetyScore", "averageCost"],
+  "additionalProperties": true,
+  "properties": {
+    "city": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Destination city name"
+    },
+    "weather": {
+      "type": "object",
+      "required": ["temp", "condition"],
+      "properties": {
+        "temp": {
+          "type": "number",
+          "description": "Current temperature in Celsius"
+        },
+        "condition": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Weather condition description"
+        }
+      }
+    },
+    "places": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of popular places"
+    },
+    "crowdLevel": {
+      "type": "string",
+      "description": "Crowd level (Low/Moderate/High)"
+    },
+    "bestSeason": {
+      "type": "string",
+      "description": "Best season to visit"
+    },
+    "safetyScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Safety score out of 10"
+    },
+    "averageCost": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Average daily cost in INR"
+    }
+  }
+}

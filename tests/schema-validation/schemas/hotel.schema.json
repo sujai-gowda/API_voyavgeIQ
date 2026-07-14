@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "voyageiq/hotel",
+  "title": "Hotel Search Result Item",
+  "description": "Schema for a single hotel object returned by GET /api/search/hotels",
+  "type": "object",
+  "required": ["id", "type", "name", "price", "rating"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique hotel identifier"
+    },
+    "type": {
+      "type": "string",
+      "const": "hotel",
+      "description": "Must always be 'hotel'"
+    },
+    "provider": {
+      "type": "string",
+      "description": "Data source (Booking.com, Mock)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Hotel name"
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Price per night in INR"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Hotel rating out of 5"
+    },
+    "distance": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Distance from city center in km"
+    },
+    "amenities": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of amenities"
+    },
+    "image": {
+      "type": "string",
+      "description": "Hotel image URL"
+    },
+    "score": {
+      "type": ["number", "null"],
+      "description": "AI ranking score (0-100), null before ranking"
+    }
+  }
+}
